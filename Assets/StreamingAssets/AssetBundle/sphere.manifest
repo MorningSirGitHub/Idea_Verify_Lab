@@ -1,0 +1,33 @@
+ManifestFileVersion: 0
+CRC: 3138433007
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 6f00bf3d857cdb5f1e7d44d19cc6226a
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 3d2dbf1215e5f6d6251d45ed838a48e0
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 135
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetsBundle/Prefabs/Sphere.prefab
+Dependencies:
+- D:/Unity_WorkSpace/MyTest/Assets/StreamingAssets/AssetBundle/1228iconc512

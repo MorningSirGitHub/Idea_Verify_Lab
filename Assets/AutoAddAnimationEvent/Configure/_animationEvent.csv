@@ -1,0 +1,5 @@
+文件路径（相对路径  Assets/Alive/ 开头）,动作名称,事件名称（播放音效;播放特效)(_Sound;_Effect）,事件参数（预制体id1.音效名1/预制体id2.音效名;该动作通用特效）,事件发生概率(百分比),事件帧数或者时间(30fps)：s1(1秒)f20(20帧 20/30 = 0.667秒)
+Assets/AutoAddAnimationEvent/Models/zombie_tynv/zombie_tynv.fbx,attack_01,_Sound;_Attack,attack_zhuaji,100,f11;f20
+Assets/AutoAddAnimationEvent/Models/zombie_tynv/zombie_tynv.fbx,idle_01,_Sound;_Attack,attack_zhuaji,100,f11;f20
+Assets/AutoAddAnimationEvent/Models/zombie_tynv/zombie_tynv.fbx,run_04,_Sound;_Attack,attack_zhuaji,100,f11;f20
+Assets/AutoAddAnimationEvent/Models/zombie_tynv/zombie_tynv.fbx,skill_01,_Sound;_Attack,attack_zhuaji,100,f11;f20

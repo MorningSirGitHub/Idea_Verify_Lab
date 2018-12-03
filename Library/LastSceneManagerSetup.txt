@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/VectorSlerp/Scenes/Slerp.unity
+  isLoaded: 1
+  isActive: 1
