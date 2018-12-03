@@ -35,7 +35,7 @@ public class BezierCurve : MonoBehaviour
         {
             float t = i / (float)_segmentNum;
             int nodeIndex = 0;
-            Vector3 pixel = CalculateCubicBezierPoint(t, controlPoints[nodeIndex].position,
+            UnityEngine.Vector3 pixel = CalculateCubicBezierPoint(t, controlPoints[nodeIndex].position,
                 controlPoints[nodeIndex + 1].position, controlPoints[nodeIndex + 2].position);
             lineRenderer.positionCount = i;
             lineRenderer.SetPosition(i - 1, pixel);
@@ -43,13 +43,13 @@ public class BezierCurve : MonoBehaviour
 
     }
 
-    Vector3 CalculateCubicBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2)
+    Vector3 CalculateCubicBezierPoint(float t, UnityEngine.Vector3 p0, UnityEngine.Vector3 p1, UnityEngine.Vector3 p2)
     {
         float u = 1 - t;
         float tt = t * t;
         float uu = u * u;
 
-        Vector3 p = uu * p0;
+        UnityEngine.Vector3 p = uu * p0;
         p += 2 * u * t * p1;
         p += tt * p2;
 

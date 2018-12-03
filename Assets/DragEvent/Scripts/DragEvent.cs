@@ -77,11 +77,11 @@ public class DragEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        transform.localPosition = Vector3.one * 0.5f;
+        transform.localPosition = UnityEngine.Vector3.one * 0.5f;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        transform.localPosition = Vector3.one;
+        transform.localPosition = UnityEngine.Vector3.one;
     }
 }

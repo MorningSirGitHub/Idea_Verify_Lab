@@ -8,9 +8,9 @@ public class TestCameraView : MonoBehaviour
     private void Update()
     {
         if (Input.GetMouseButton(0))
-            transform.Translate(Vector3.left * Time.deltaTime * 5f);
+            transform.Translate(UnityEngine.Vector3.left * Time.deltaTime * 5f);
         if (Input.GetMouseButton(1))
-            transform.Translate(Vector3.right * Time.deltaTime * 5f);
+            transform.Translate(UnityEngine.Vector3.right * Time.deltaTime * 5f);
     }
 
     private void OnBecameVisible()

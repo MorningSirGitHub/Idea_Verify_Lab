@@ -16,7 +16,7 @@ public class EnemySpawner : MonoBehaviour
         {
             // Choose a random location within the spawnRadius
             Vector2 randomLoc2d = Random.insideUnitCircle * spawnRadius;
-            Vector3 randomLoc3d = new Vector3(transform.position.x + randomLoc2d.x, transform.position.y, transform.position.z + randomLoc2d.y);
+            UnityEngine.Vector3 randomLoc3d = new UnityEngine.Vector3(transform.position.x + randomLoc2d.x, transform.position.y, transform.position.z + randomLoc2d.y);
 
             // Make sure the location is on the NavMesh
             NavMeshHit hit;

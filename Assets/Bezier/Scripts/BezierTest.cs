@@ -9,7 +9,7 @@ public class BezierTest : MonoBehaviour
 
     public List<Transform> PointList = new List<Transform>();
 
-    private List<Vector3> m_Points = new List<Vector3>();
+    private List<UnityEngine.Vector3> m_Points = new List<UnityEngine.Vector3>();
 
     private float m_Timer;
 
@@ -39,7 +39,7 @@ public class BezierTest : MonoBehaviour
         if (m_Timer > Duration)
         {
             m_Timer = 0;
-            transform.localPosition = Vector3.Lerp(m_Points[m_Index - 1], m_Points[m_Index], 1f);
+            transform.localPosition = UnityEngine.Vector3.Lerp(m_Points[m_Index - 1], m_Points[m_Index], 1f);
             m_Index++;
 
             if (m_Index >= m_Points.Count)
@@ -55,16 +55,16 @@ public class BezierTest : MonoBehaviour
     /// <param name="t"></param>
     /// <param name="p"></param>
     /// <returns></returns>
-    public Vector3 Bezier(float t, List<Vector3> p)
+    public Vector3 Bezier(float t, List<UnityEngine.Vector3> p)
     {
         if (p.Count < 2)
             return p[0];
 
-        List<Vector3> newp = new List<Vector3>();
+        List<UnityEngine.Vector3> newp = new List<UnityEngine.Vector3>();
         for (int i = 0; i < p.Count - 1; i++)
         {
             Debug.DrawLine(p[i], p[i + 1]);
-            Vector3 p0p1 = (1 - t) * p[i] + t * p[i + 1];
+            UnityEngine.Vector3 p0p1 = (1 - t) * p[i] + t * p[i + 1];
             newp.Add(p0p1);
         }
 
@@ -82,7 +82,7 @@ public class BezierTest : MonoBehaviour
         if (p.Count < 2)
             return p[0].position;
 
-        List<Vector3> newp = new List<Vector3>();
+        List<UnityEngine.Vector3> newp = new List<UnityEngine.Vector3>();
         for (int i = 0; i < p.Count; i++)
         {
             newp.Add(p[i].position);

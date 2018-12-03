@@ -10,7 +10,7 @@ public class EnemyMovement : MonoBehaviour
     public Transform proxy;
     NavMeshAgent agent;
     NavMeshObstacle obstacle;
-    Vector3 lastPosition;
+    UnityEngine.Vector3 lastPosition;
 
     void Start()
     {
@@ -58,10 +58,10 @@ public class EnemyMovement : MonoBehaviour
             agent.destination = player.position;
         }
 
-        model.position = Vector3.Lerp(model.position, proxy.position, Time.deltaTime * 2);
+        model.position = UnityEngine.Vector3.Lerp(model.position, proxy.position, Time.deltaTime * 2);
 
         // Calculate the orientation based on the velocity of the agent
-        Vector3 orientation = model.position - lastPosition;
+        UnityEngine.Vector3 orientation = model.position - lastPosition;
 
         // Check if the agent has some minimal velocity
         if (orientation.sqrMagnitude > 0.1f)

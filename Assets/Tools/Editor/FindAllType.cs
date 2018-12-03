@@ -16,7 +16,7 @@ public class FindAllType : EditorWindow
     private string m_Default = "*.";
     private string m_Extension = "dds";
     private List<Object> m_TargetList = new List<Object>();
-    private Vector3 m_ScrollPos = Vector2.zero;
+    private UnityEngine.Vector3 m_ScrollPos = Vector2.zero;
 
     [MenuItem("查找工具/查找所有指定后缀文件")]
     public static void Create()
