@@ -315,6 +315,8 @@
     <None Include="Assets\AnimatorForECSLockStep\Models\zombie_tynv\Materials\ZombieDeathHideShader.shader" />
     <None Include="Assets\AnimatorSample\Models\zombie_tynv\Materials\ZombieDeathHideShader.shader" />
     <None Include="Assets\AutoAddAnimationEvent\Models\zombie_tynv\Materials\ZombieDeathHideShader.shader" />
+    <None Include="Assets\ProjectorShadow\Shader\ShadowCaster.shader" />
+    <None Include="Assets\ProjectorShadow\Shader\ShadowReceive.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/VectorSlerp/Scenes/Slerp.unity
+- path: Assets/ProjectorShadow/Scenes/ProjectorShadow.unity
   isLoaded: 1
   isActive: 1
