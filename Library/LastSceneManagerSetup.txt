@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/ProjectorShadow/Scenes/ProjectorShadow.unity
+- path: Assets/Socket/Scenes/Socket.unity
   isLoaded: 1
   isActive: 1

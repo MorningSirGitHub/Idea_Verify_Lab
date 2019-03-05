@@ -287,6 +287,9 @@
     <Reference Include="UnityEngine.StandardEvents">
       <HintPath>C:/Users/admin/AppData/LocalLow/Unity/cache/packages/packages.unity.com/com.unity.standardevents@1.0.10/UnityEngine.StandardEvents.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Assets/Plugins/Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
       <HintPath>C:/Unity/Editor/Data/PlaybackEngines/iOSSupport\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
     </Reference>
@@ -326,6 +329,20 @@
     <Compile Include="Assets\ProjectorShadow\Scripts\ThirdPersonCam.cs" />
     <Compile Include="Assets\ProjectorShadow\Scripts\UnitManager.cs" />
     <Compile Include="Assets\ScriptObject\Scripts\SkillInfo.cs" />
+    <Compile Include="Assets\Socket\Scripts\Connect2Server.cs" />
+    <Compile Include="Assets\Socket\Scripts\JsonNetworkService.cs" />
+    <Compile Include="Assets\Socket\Scripts\NetworkAPI.cs" />
+    <Compile Include="Assets\Socket\Scripts\NetworkBase.cs" />
+    <Compile Include="Assets\Socket\Scripts\NetworkConfig.cs" />
+    <Compile Include="Assets\Socket\Scripts\NetworkManager.cs" />
+    <Compile Include="Assets\Socket\Scripts\NetworkMessage.cs" />
+    <Compile Include="Assets\Socket\Scripts\SocketBase.cs" />
+    <Compile Include="Assets\Socket\Scripts\SocketServer.cs" />
+    <Compile Include="Assets\Socket\TestNetwork.cs" />
+    <Compile Include="Assets\Tools\ByteTool.cs" />
+    <Compile Include="Assets\Tools\JsonTool.cs" />
+    <Compile Include="Assets\Tools\MiniJSON.cs" />
+    <Compile Include="Assets\Tools\MonoSingleton.cs" />
     <Compile Include="Assets\Tools\StringUtility.cs" />
     <Compile Include="Assets\Tools\TimerSystem.cs" />
     <Compile Include="Assets\UI&amp;Ray_Infiltration\Scripts\RayCross.cs" />
