@@ -34,7 +34,7 @@ public class AnimatorSample : MonoBehaviour
 
     void ChangeAnimationClipDynamic()
     {
-        UnityEditor.EditorGUIUtility.PingObject(clip);
+        //UnityEditor.EditorGUIUtility.PingObject(clip);
         AnimatorOverrideController overrideController = new AnimatorOverrideController();
 
         Debug.LogError("Before____________" + m_Animator.runtimeAnimatorController.animationClips[0].name);

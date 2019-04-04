@@ -4,4 +4,7 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/SimpleLOD/musuntingskins/test.unity
+    guid: 487c4abdd24c66c4aa54ac737efdbf46

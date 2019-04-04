@@ -23,7 +23,7 @@ public class TestNetwork : MonoBehaviour
         }
     }
 
-    [NUnit.Framework.Test(Description = "网络测试")]
+    //[NUnit.Framework.Test(Description = "网络测试")]
     public void Init()
     {
         //        ResourcesConfigManager.Initialize();
