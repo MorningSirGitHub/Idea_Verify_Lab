@@ -1,6 +1,6 @@
 Android
 SceneListBegin?
-Assets/SimpleLOD/musuntingskins/test.unity
+Assets/Clavian/SuperTextMeshTest.unity
 SceneListEnd?
 2eea1388f10cf0cd207a850d6161a8b4 Assembly-CSharp.dll:.SimpleLODDemo
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.SlerpTools
@@ -127,6 +127,7 @@ bc68edb0af574bf79f9550ead8ebae5c UnityEngine.HoloLens.dll:UnityEngine.Audio.Audi
 463516d5b5fe8e67a0a24c48f2095b04 UnityEngine.HoloLens.dll:UnityEngine.EventSystems.HoloLensInputModule
 c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.SpatialMappingCollider
 45f3431f0103c41611e8d4eec3d439df UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.SpatialMappingRenderer
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.RotateSelf
 0cb273c796514db93c9d557a1567bdde Assembly-CSharp.dll:.ThirdPersonCam
 38610968f662fbb3d185e5f9cb4c8c91 Assembly-CSharp.dll:.AnimationSample
 3250ee7ebea0b3423c31ff65806eef08 Assembly-CSharp.dll:.ProjectorShadow
@@ -163,6 +164,7 @@ bc68edb0af574bf79f9550ead8ebae5c UnityEngine.HoloLens.dll:UnityEngine.Audio.Audi
 463516d5b5fe8e67a0a24c48f2095b04 UnityEngine.HoloLens.dll:UnityEngine.EventSystems.HoloLensInputModule
 c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.SpatialMappingCollider
 45f3431f0103c41611e8d4eec3d439df UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.SpatialMappingRenderer
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.TestOp
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
 35da0cb7df68c22ec01cacc86ebfe1c9 Assembly-CSharp.dll:.SkillInfo
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.Test
@@ -175,5 +177,30 @@ c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.Spa
 1ce6bc7597e3a919598d02932cdc39f9 Assembly-CSharp.dll:.SimpleLODShowInfo
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.DrawLine
 9051f800a836f8d28041a4c010f662ed Assembly-CSharp.dll:.SampleMode
-05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.TestOp
-05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.RotateSelf
+57f5ab603056181f7c1b2a980b33bd7b Assembly-CSharp.dll:.STMEventInterpreter
+dc7c79d279c7db671b5343c1c88ec717 Assembly-CSharp.dll:.STMColorData
+ae3a2f06e1e5dc318ff2b0b12f4edaeb Assembly-CSharp.dll:.STMDrawAnimData
+742ce29c4ad10e0b7853ade7b7cc03a8 Assembly-CSharp.dll:.SuperTextMesh
+4761e15eaaeebd15fe300bd130f70ef8 Assembly-CSharp.dll:.STMReadoutControls
+4761e15eaaeebd15fe300bd130f70ef8 Assembly-CSharp.dll:.STMContinue
+f6569152f351cba23d20ae54f9ba5ff3 Assembly-CSharp.dll:.STMSimpleButton
+58e416c1f6922eee709bb8b9ce3d1d8e Assembly-CSharp.dll:.STMSampleLink
+4b667a25d61e11c14ca26fa8e4d50733 Assembly-CSharp.dll:.STMCurveGenerator
+e7cad0cd38cfd23c44199eb8c87a6385 Assembly-CSharp.dll:.STMVoiceData
+7bcc135575fc5bd9a6a3058c559ce3b7 Assembly-CSharp.dll:.STMJitterData
+ddecbc9546082ee7e1715a0cdba2f324 Assembly-CSharp.dll:.STMWaveData
+bb4a0929eec6b6e4b5ac1d6e864e64d4 Assembly-CSharp.dll:.SuperTextMeshData
+e9618a1ca4ddd3b723178f0e926c470d Assembly-CSharp.dll:.STMChangeSortingOrder
+3dd3728df6f75a9c95f089a74fb10d18 Assembly-CSharp.dll:.STMGradientData
+bb26b74627185a7fa873a1fc805849f6 Assembly-CSharp.dll:.STMSoundClipData
+bbf3b93c2ec493f19740c6ab756345f1 Assembly-CSharp.dll:.STMAudioClipData
+13fae1efec4502445d20263a312eab31 Assembly-CSharp.dll:.STMAppendExample
+cac5e62c64bc02a8223e45b78da71b3c Assembly-CSharp.dll:.STMMaterialData
+a83593d28559492a2474195534b156e7 Assembly-CSharp.dll:.STMTextureData
+2265052b62c8d1041cc27b1698aad61f Assembly-CSharp.dll:.STMAutoClipData
+fcf557893fc8c6341e01aeff092e987c Assembly-CSharp.dll:.STMInputStringDemo
+d0d13dcaf265ff61b6af70a311e4b105 Assembly-CSharp.dll:.STMFontData
+54645442b304145ae504d181180c3a2c Assembly-CSharp.dll:.STMVertexMod
+cfb0ca4e2b074c3ed5c544ddfd916ece Assembly-CSharp.dll:.STMQuadData
+7195d43671e7d6626ba360cbf7903e85 Assembly-CSharp.dll:.STMDelayData
+a210688f641ecc646e0caa386bdcd457 Assembly-CSharp.dll:.STMDialogueSample

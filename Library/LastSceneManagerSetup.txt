@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/SimpleLOD/musuntingskins/test.unity
+- path: Assets/Clavian/SuperTextMeshTest.unity
   isLoaded: 1
   isActive: 1
