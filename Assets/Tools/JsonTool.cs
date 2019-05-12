@@ -105,19 +105,19 @@ public class JsonTool
     // 从一个对象信息生成Json串
     public static string ObjectToJson(object obj)
     {
-        return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
-//        return JsonUtility.ToJson(obj);
+        //return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+        return JsonUtility.ToJson(obj);
     }
     // 从一个Json串生成对象信息
     public static object JsonToObject(string jsonString, Type type)
     {
-        return Newtonsoft.Json.JsonConvert.DeserializeObject(jsonString, type);
+        return null;// Newtonsoft.Json.JsonConvert.DeserializeObject(jsonString, type);
     }
     
     public static T JsonToObject<T>(string jsonString)
     {
-        return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(jsonString);
-//        return JsonUtility.FromJson<T>(jsonString);
+        //return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(jsonString);
+        return JsonUtility.FromJson<T>(jsonString);
     }
 
 
