@@ -6,16 +6,17 @@ using UnityEngine.UI;
 public class HyperlinkControl : MonoBehaviour
 {
 
-    public HyperlinkText m_HyperlinkText;
+    public HyperlinkText m_Hyperlink;
+    private HyperlinkText Hyperlink { get { return m_Hyperlink ?? (m_Hyperlink = GameObject.FindObjectOfType<HyperlinkText>()); } }
 
     void Start()
     {
-        m_HyperlinkText.FillEmoji((image, emojiName) =>
+        Hyperlink.FillEmoji((image, emojiName) =>
         {
             Debug.LogError(emojiName + " --> EmojiFillHandler");
             //image.sprite = ResourcesTool.Instance.HyperlinkEmojiPath<Sprite>(emojiName);
         });
-        m_HyperlinkText.FillCustom((rect, prefabPath) =>
+        Hyperlink.FillCustom((rect, prefabPath) =>
         {
             Debug.LogError(prefabPath + " --> CustomFillHandler");
             //Object prefab = ResourcesTool.Instance.HyperlinkEmojiPath<Object>(prefabPath);
@@ -25,7 +26,7 @@ public class HyperlinkControl : MonoBehaviour
             //objRect.localScale = Vector3.one;
             //objRect.anchoredPosition = Vector2.zero;
         });
-        m_HyperlinkText.SetHyperlinkListener(content =>
+        Hyperlink.SetHyperlinkListener(content =>
         {
             Debug.LogError("HyperlinkText Clicked !! --> " + content);
         });
