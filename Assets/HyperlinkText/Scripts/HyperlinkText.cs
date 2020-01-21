@@ -13,7 +13,7 @@ namespace UnityEngine.UI
 {
     [ExecuteInEditMode]
     [RequireComponent(typeof(CanvasRenderer))]
-    [RequireComponent(typeof(UIVertexOptimize))]
+    //[RequireComponent(typeof(UIVertexOptimize))]
     public class HyperlinkText : Text, IPointerClickHandler
     {
 
