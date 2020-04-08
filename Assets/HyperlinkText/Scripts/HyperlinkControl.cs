@@ -12,6 +12,7 @@ public class HyperlinkControl : MonoBehaviour
 
     private void Start()
     {
+        CreateBroadcast();
         Hyperlink.FillEmoji((image, emojiName) =>
         {
             Debug.LogError(emojiName + " --> EmojiFillHandler");
@@ -86,5 +87,101 @@ public class HyperlinkControl : MonoBehaviour
             Hyperlink.rectTransform.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, offset.y, hyperSize.y);
         }
     }
+
+
+
+    #region 创建及缓存
+
+    private static GameObject m_BroadcastRoot;
+    private Image m_BroadcastBG;
+    private HyperlinkText m_BroadcastContent;
+
+    protected void CreateBroadcast()
+    {
+        if (m_BroadcastRoot == null)
+        {
+            m_BroadcastRoot = CreateUIRootGameObject("BroadcastRoot");
+            m_BroadcastRoot.layer = LayerMask.NameToLayer("UI");
+            m_BroadcastRoot.transform.SetAsLastSibling();
+        }
+        if (m_BroadcastBG == null)
+        {
+            var BGObj = CreateUIGameObject("System", m_BroadcastRoot.transform);
+            BGObj.layer = LayerMask.NameToLayer("UI");
+            BGObj.transform.SetAsFirstSibling();
+            GetOrAddComponent<RectMask2D>(BGObj);
+            m_BroadcastBG = GetOrAddComponent<Image>(BGObj);
+            m_BroadcastBG.rectTransform.anchoredPosition = new Vector2(0, Screen.height / 2f - 200);
+            m_BroadcastBG.rectTransform.sizeDelta = new Vector2(300, 30);
+            m_BroadcastBG.raycastTarget = true;
+            m_BroadcastBG.color = Color.clear;
+        }
+        else
+        {
+            m_BroadcastBG.gameObject.SetActive(true);
+        }
+        if (m_BroadcastContent == null)
+        {
+            var contentObj = CreateUIGameObject("Content", m_BroadcastBG.transform);
+            contentObj.layer = LayerMask.NameToLayer("UI");
+            contentObj.transform.SetAsLastSibling();
+            m_BroadcastContent = GetOrAddComponent<HyperlinkText>(contentObj);
+            m_BroadcastContent.rectTransform.anchoredPosition = Vector2.zero;
+            m_BroadcastContent.rectTransform.sizeDelta = new Vector2(300, 30);
+            m_BroadcastContent.font = Font.CreateDynamicFontFromOSFont("Arial", 24);
+            m_BroadcastContent.fontSize = 24;
+            m_BroadcastContent.raycastTarget = false;
+            m_BroadcastContent.supportRichText = true;
+            m_BroadcastContent.alignment = TextAnchor.MiddleCenter;
+            m_BroadcastContent.horizontalOverflow = HorizontalWrapMode.Overflow;
+            m_BroadcastContent.text = "<size=24><color=#ffffff>{0x02#a=Icons/AC}？？？</color></size>";
+        }
+    }
+    protected GameObject CreateUIRootGameObject(string name, int layer = int.MaxValue, Transform parent = null)
+    {
+        var obj = CreateUIGameObject(name, parent);
+
+        //var camera = GetOrAddComponent<Camera>(obj);
+        //camera.clearFlags = CameraClearFlags.Depth;
+        //camera.cullingMask = LayerMask.NameToLayer("UI");
+        //camera.orthographic = true;
+        //camera.depth = 999999;
+
+        var canvas = GetOrAddComponent<Canvas>(obj);
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = layer;
+
+        var graphicRaycaster = GetOrAddComponent<GraphicRaycaster>(obj);
+
+        GetOrAddComponent<CanvasScaler>(obj);
+
+        return obj;
+    }
+    protected GameObject CreateUIGameObject(string name, Transform parent = null)
+    {
+        var obj = new GameObject(name);
+
+        var rect = GetOrAddComponent<RectTransform>(obj);
+        //rect.anchorMin = Vector3.zero;
+        //rect.anchorMax = Vector3.one;
+        //rect.sizeDelta = Vector2.zero;
+
+        rect.SetParent(parent);
+        rect.localEulerAngles = Vector3.zero;
+        rect.localPosition = Vector3.zero;
+        rect.localScale = Vector3.one;
+
+        return obj;
+    }
+    protected T GetOrAddComponent<T>(GameObject obj) where T : Component
+    {
+        var component = obj.GetComponent<T>();
+        if (component != null)
+            return component;
+
+        return obj.AddComponent<T>();
+    }
+
+    #endregion
 
 }
