@@ -13,7 +13,7 @@ namespace UnityEngine.UI
 {
     [ExecuteInEditMode]
     [RequireComponent(typeof(CanvasRenderer))]
-    [RequireComponent(typeof(UIVertexOptimize))]
+    //[RequireComponent(typeof(UIVertexOptimize))]
     public class HyperlinkText : Text, IPointerClickHandler
     {
 
@@ -194,7 +194,7 @@ namespace UnityEngine.UI
                         if (m_HyperlinkClickEvent == null)
                             continue;
 
-                        m_HyperlinkClickEvent.Invoke(h, hrefInfo.url);
+                        m_HyperlinkClickEvent(h, hrefInfo.url);
                         return;
                     }
                 }
@@ -297,7 +297,9 @@ namespace UnityEngine.UI
                 return;
 
             // NOTE: 如果GameObject是关闭状态可以不更新
-            if (!gameObject.activeSelf || string.IsNullOrEmpty(m_Text) || base.preferredHeight <= 0 || base.preferredWidth <= 0)
+            if (!gameObject.activeSelf || string.IsNullOrEmpty(m_Text) ||
+                base.preferredHeight <= 0 || base.preferredWidth <= 0 ||
+                rectTransform.rect.height <= 0 || rectTransform.rect.width <= 0)
             {
                 ResetField();
                 toFill.Clear();
@@ -393,6 +395,11 @@ namespace UnityEngine.UI
         {
             StopCoroutine(ShowImages());
             base.Rebuild(update);
+        }
+        protected override void OnDisable()
+        {
+            ResetField();
+            base.OnDisable();
         }
 
         #endregion

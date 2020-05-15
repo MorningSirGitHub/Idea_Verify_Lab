@@ -34,14 +34,13 @@ public class UIVertexOptimize : BaseMeshEffect
 
     private void OptimizeVert(ref List<UIVertex> vertices)
     {
-        List<Triangle> tris = new List<Triangle>(vertices.Count % 3 + 1);
+        List<Triangle> tris = new List<Triangle>(vertices.Count / 3 + 1);
         for (int i = 0; i < vertices.Count - 3; i += 3)
             tris.Add(new Triangle() { v1 = vertices[i], v2 = vertices[i + 1], v3 = vertices[i + 2] });
 
         //去除重复元素
         vertices = tris.Distinct().SelectMany(tri => new[] { tri.v1, tri.v2, tri.v3 }).ToList();
         //TODO: 下划线需要进行优化
-        //vertices.AddRange();
     }
 
 }
