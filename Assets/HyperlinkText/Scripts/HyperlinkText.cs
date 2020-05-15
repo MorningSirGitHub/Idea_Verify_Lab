@@ -13,15 +13,15 @@ namespace UnityEngine.UI
 {
     [ExecuteInEditMode]
     [RequireComponent(typeof(CanvasRenderer))]
-    //[RequireComponent(typeof(UIVertexOptimize))]
+    [RequireComponent(typeof(UIVertexOptimize))]
     public class HyperlinkText : Text, IPointerClickHandler
     {
 
         #region -----------------------------------------> 内部字段 <------------------------------------------
 
-        protected string m_OutputText = "";
+        protected string m_HyperOutputText;
         //"\\([0-9A-Za-z]+)((\\|[0-9]+){0,2})(##[0-9a-f]{6})?(#[^=\\]]+)?(=[^\\]]+)?\\]"// [\\w*/]*? --路径匹配
-        protected const string m_RegexTag = "\\{([0-9A-Za-z]+)((\\|[0-9]+){0,2})(##[0-9a-f]{6})?(#[^=\\}]+)?(=[^\\}]+)?\\}";// 坐标需要 [0,0] 格式，链接格式改为 {...}
+        protected const string m_RegexTag = "\\{([0-9A-Za-z]+)((\\|[0-9]+){0,2})(##[0-9a-fA-F]{6})?(#[^=\\}]*)?(=[^\\}]*)?\\}";// 坐标需要 [0,0] 格式，链接格式改为 {...}
         protected const string m_RegexCustom = "<material=u(#[0-9a-f]{6})?>(((?!</material>).)*)</material>";// 下划线
         protected const string m_RegexRichFormat = "<.*?>";// 富文本
         protected const string m_RegexNumber = "([0-9]+)";// 字体
@@ -38,7 +38,18 @@ namespace UnityEngine.UI
 #if UNITY_EDITOR
         protected readonly List<GameObject> m_Effects = new List<GameObject>();
 #endif
-        private static Dictionary<string, Dictionary<string, SpriteInfo>> m_EmojiData = new Dictionary<string, Dictionary<string, SpriteInfo>>();
+
+        public bool IsDrawUnderLine = true;
+        public bool IsMultiLine { get { return horizontalOverflow == HorizontalWrapMode.Wrap && cachedTextGenerator.lineCount > 1; } }
+        public bool IsLimitMultiLine { get { return preferredHeight > cachedTextGenerator.rectExtents.height; } }
+        protected bool m_IsMultiLine { get { return IsMultiLine || IsLimitMultiLine; } }
+        protected Dictionary<int, EmojiInfo> m_EmojisDic { get { return m_IsMultiLine ? m_Emojis : m_EmojisReallyIndex; } }
+
+        #endregion
+
+        #region -----------------------------------------> 资源读取 <------------------------------------------
+
+        protected static Dictionary<string, Dictionary<string, SpriteInfo>> m_EmojiData = new Dictionary<string, Dictionary<string, SpriteInfo>>();
         protected Dictionary<string, SpriteInfo> EmojiData
         {
             get
@@ -48,32 +59,24 @@ namespace UnityEngine.UI
                     return selectEmoji;
 
                 ReadEmojiConfig(ref selectEmoji);
-                m_EmojiData.Add(EmojiType, selectEmoji);
                 return selectEmoji;
             }
         }
 
-        protected Dictionary<int, EmojiInfo> m_EmojisDic { get { return m_IsMultiLine ? m_Emojis : m_EmojisReallyIndex; } }
-        private bool m_IsMultiLine { get { return IsMultiLine || IsLimitMultiLine; } }
-        ///<summary>该判断需要在ParseText之后才能获得正确结果</summary>
-        public bool IsMultiLine { get { return horizontalOverflow == HorizontalWrapMode.Wrap && cachedTextGenerator.lineCount > 1; } }
-        ///<summary>该判断需要在ParseText之后才能获得正确结果</summary>
-        public bool IsLimitMultiLine { get { return preferredHeight > cachedTextGenerator.rectExtents.height; } }
-
-        #endregion
-
-        #region -----------------------------------------> 资源读取 <------------------------------------------
-
-        private const string EmojiTest = "Test";
-        private const string EmojiName = "emoji";
-        private const string EmojiPath = "Emoji/";
+        protected const string EmojiTest = "Test";
+        protected const string EmojiName = "emoji";
+        protected const string EmojiPath = "Emoji/";
         public string EmojiType = EmojiTest;//获取用户选择的Emoji名字（或者以后改为其他方式）
-        private void ReadEmojiConfig(ref Dictionary<string, SpriteInfo> selectEmoji)
+        protected void ReadEmojiConfig(ref Dictionary<string, SpriteInfo> selectEmoji)
         {
+            var config = EmojiConfig();
+            if (config == null)
+                return;
+
             if (selectEmoji == null)
                 selectEmoji = new Dictionary<string, SpriteInfo>();
 
-            string emojiContent = EmojiConfig.text;
+            string emojiContent = config.text;
             string[] lines = emojiContent.Split('\n');
             for (int i = 1; i < lines.Length; i++)
             {
@@ -86,10 +89,17 @@ namespace UnityEngine.UI
                     selectEmoji.Add(strs[0], info);
                 }
             }
+            m_EmojiData.Add(EmojiType, selectEmoji);
         }
-        private TextAsset EmojiConfig { get { return LoadAssets<TextAsset>(EmojiName + "_config"); } }
-        private Material EmojiMat { get { return LoadAssets<Material>(EmojiName + "_mat"); } }
-        private T LoadAssets<T>(string path) where T : Object
+        protected TextAsset EmojiConfig()
+        {
+            return LoadAssets<TextAsset>(EmojiName + "_config");
+        }
+        protected Material EmojiMat()
+        {
+            return LoadAssets<Material>(EmojiName + "_mat");
+        }
+        protected T LoadAssets<T>(string path) where T : Object
         {
             // 根据用户选择的 表情进行加载
             //if (EmojiType == EmojiTest)
@@ -99,76 +109,157 @@ namespace UnityEngine.UI
             var type = string.IsNullOrEmpty(EmojiType) ? string.Empty : "/";
             var loadPath = EmojiPath + EmojiType + type + path;
 #if UNITY_EDITOR
-            if (Application.isEditor)
+            if (Application.isEditor && !Application.isPlaying)
             {
                 var extension = string.Empty;
                 if (typeof(T).IsAssignableFrom(typeof(Material)))
                     extension = ".mat";
                 else if (typeof(T).IsAssignableFrom(typeof(TextAsset)))
                     extension = ".txt";
+                else if (typeof(T).IsAssignableFrom(typeof(Sprite)))
+                    extension = ".png";
 
-                loadPath = "HyperlinkText/" + loadPath + extension;
+                loadPath = "Assets/HyperlinkText/" + loadPath + extension;
                 return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(loadPath);
             }
 #endif
-            return Resources.Load<T>(loadPath);
+            return Resources.Load<T>("HyperlinkText/" + loadPath);
         }
 
         #endregion
 
-        #region -----------------------------------------> 回调 <------------------------------------------
+        #region -----------------------------------------> 外部回调 <------------------------------------------
 
-        private Action<Image, string> EmojiFillHandler;
+        protected Action<Image, string> m_EmojiFillHandler;
         /// <summary>0x02 Fill Image，(Image, link) </summary>
         public void FillEmoji(Action<Image, string> callback, bool isClear = true)
         {
             if (isClear)
-                EmojiFillHandler = callback;
+                m_EmojiFillHandler = callback;
             else
-                EmojiFillHandler += callback;
+                m_EmojiFillHandler += callback;
         }
-
-        private Action<RectTransform, string> CustomFillHandler;
+        protected Action<RectTransform, string> m_CustomFillHandler;
         /// <summary>0x03 Custom Fill (RectTransform, link)</summary>
         public void FillCustom(Action<RectTransform, string> callback, bool isClear = true)
         {
             if (isClear)
-                CustomFillHandler = callback;
+                m_CustomFillHandler = callback;
             else
-                CustomFillHandler += callback;
+                m_CustomFillHandler += callback;
         }
-
-        private Action<string> HyperlinkClickEvent;
-        /// <summary>Hyper Link Click Event</summary>
-        public void SetHyperlinkListener(Action<string> callback, bool isClear = true)
+        protected Action<int, string> m_HyperlinkClickEvent;
+        /// <summary>0x01 Hyper Link Click Event (boxIndex, url)</summary>
+        public void SetHyperlinkListener(Action<int, string> callback, bool isClear = true)
         {
             if (isClear)
-                HyperlinkClickEvent = callback;
+                m_HyperlinkClickEvent = callback;
             else
-                HyperlinkClickEvent += callback;
+                m_HyperlinkClickEvent += callback;
+        }
+        protected Action m_OnPopulateMeshOverEvent;
+        /// <summary>OnPopulateMesh Event</summary>
+        public void SetOnPopulateMeshOverListener(Action callback, bool isClear = true)
+        {
+            if (isClear)
+                m_OnPopulateMeshOverEvent = callback;
+            else
+                m_OnPopulateMeshOverEvent += callback;
+        }
+        protected Action<Vector2> m_PointerClickEvent;
+        /// <summary>PointerClick Event (localPoint)</summary>
+        public void SetPointerClickListener(Action<Vector2> callback, bool isClear = true)
+        {
+            if (isClear)
+                m_PointerClickEvent = callback;
+            else
+                m_PointerClickEvent += callback;
         }
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
-            Vector2 lp;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, eventData.position, eventData.pressEventCamera, out lp);
+            Vector2 localPoint;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, eventData.position, eventData.pressEventCamera, out localPoint);
+            if (m_PointerClickEvent != null)
+                m_PointerClickEvent(localPoint);
+
             for (int h = 0; h < m_Hrefs.Count; h++)
             {
                 var hrefInfo = m_Hrefs[h];
                 var boxes = hrefInfo.boxes;
                 for (var i = 0; i < boxes.Count; ++i)
                 {
-                    if (boxes[i].Contains(lp))
+                    if (boxes[i].Contains(localPoint))
                     {
-                        if (HyperlinkClickEvent == null)
+                        if (m_HyperlinkClickEvent == null)
                             continue;
 
-                        HyperlinkClickEvent.Invoke(hrefInfo.url);
+                        m_HyperlinkClickEvent.Invoke(h, hrefInfo.url);
                         return;
                     }
                 }
             }
         }
+
+        #region 为了不能包更而做的妥协，暂存
+
+        //----------------------------------------------- 功能回调函数 ------------------------------------------------------
+
+        //private Action<Vector2> m_PointerClick;
+        //public void SetPointerClickListener(Action<Vector2> callback)
+        //{
+        //    m_PointerClick = callback;
+        //}
+        //private Func<string> m_GetHyperText;
+        ///// <summary> 获取 m_HyperOutputText 的回调</summary>
+        //public void SetHyperTextListener(Func<string> callback)
+        //{
+        //    m_GetHyperText = callback;
+        //}
+        //private Action<string> m_SetHyperText;
+        ///// <summary> 设置 m_HyperOutputText 的回调</summary>
+        //public void SetHyperTextListener(Action<string> callback)
+        //{
+        //    m_SetHyperText = callback;
+        //}
+        //private Action<string, Material, int, Color> m_ParseText;
+        ///// <summary> 解析原字符串 的回调</summary>
+        //public void SetParseTextListener(Action<string, Material, int, Color> callback)
+        //{
+        //    m_ParseText = callback;
+        //}
+        //private Func<UIVertex, int, UIVertex> m_DealWithEmojiData;
+        ///// <summary> 填充emoji表情信息 的回调</summary>
+        //public void SetDealWithEmojiDataListener(Func<UIVertex, int, UIVertex> callback)
+        //{
+        //    m_DealWithEmojiData = callback;
+        //}
+        //private Action<VertexHelper> m_ComputeBounds;
+        ///// <summary> 计算边界 的回调</summary>
+        //public void SetComputeBoundsListener(Action<VertexHelper> callback)
+        //{
+        //    m_ComputeBounds = callback;
+        //}
+        //private Func<bool> m_IsDraw;
+        ///// <summary> 是否有必要绘制 的回调</summary>
+        //public void SetIsDrawUnderLineListener(Func<bool> callback)
+        //{
+        //    m_IsDraw = callback;
+        //}
+        //private Action<VertexHelper, UIVertex[], IList<UIVertex>> m_DrawUnderLine;
+        ///// <summary> 绘制下划线 的回调</summary>
+        //public void SetDrawUnderLineListener(Action<VertexHelper, UIVertex[], IList<UIVertex>> callback)
+        //{
+        //    m_DrawUnderLine = callback;
+        //}
+        //private Action m_ShowImages;
+        ///// <summary> 解析原字符串 的回调</summary>
+        //public void SetShowImagesListener(Action callback)
+        //{
+        //    m_ShowImages = callback;
+        //}
+
+        #endregion
 
         #endregion
 
@@ -177,9 +268,9 @@ namespace UnityEngine.UI
         public override string text
         {
             get { return m_Text; }
-
             set
             {
+                //NOTE:在文本长或高为0时，获取不到正确的解析
                 ParseText(value);
                 base.text = value;
             }
@@ -189,7 +280,7 @@ namespace UnityEngine.UI
             get
             {
                 var settings = GetGenerationSettings(Vector2.zero);
-                return cachedTextGeneratorForLayout.GetPreferredWidth(m_OutputText, settings) / pixelsPerUnit;
+                return cachedTextGeneratorForLayout.GetPreferredWidth(m_HyperOutputText, settings) / pixelsPerUnit;
             }
         }
         public override float preferredHeight
@@ -197,7 +288,7 @@ namespace UnityEngine.UI
             get
             {
                 var settings = GetGenerationSettings(new Vector2(rectTransform.rect.size.x, 0.0f));
-                return cachedTextGeneratorForLayout.GetPreferredHeight(m_OutputText, settings) / pixelsPerUnit;
+                return cachedTextGeneratorForLayout.GetPreferredHeight(m_HyperOutputText, settings) / pixelsPerUnit;
             }
         }
         protected override void OnPopulateMesh(VertexHelper toFill)
@@ -205,12 +296,13 @@ namespace UnityEngine.UI
             if (font == null)
                 return;
 
-            //NOTE:如果GameObject是关闭状态可以不更新, preferredHeight < fontSize 这个条件有问题 待优化
-            //if (!gameObject.activeSelf || m_Text.IsEmpty() || preferredHeight < fontSize || preferredWidth == 0)
-            //{
-            //    toFill.Clear();
-            //    return;
-            //}
+            // NOTE: 如果GameObject是关闭状态可以不更新
+            if (!gameObject.activeSelf || string.IsNullOrEmpty(m_Text) || base.preferredHeight <= 0 || base.preferredWidth <= 0)
+            {
+                ResetField();
+                toFill.Clear();
+                return;
+            }
 
             //Debug.LogError("OnPopulateMesh !!\n");
             ParseText(m_Text);
@@ -222,14 +314,14 @@ namespace UnityEngine.UI
 
             var extents = rectTransform.rect.size;
             var settings = GetGenerationSettings(extents);
-            cachedTextGenerator.Populate(m_OutputText, settings);
+            cachedTextGenerator.PopulateWithErrors(m_HyperOutputText, settings, gameObject);
 
-            //NOTE:2019.1.5f1及以后版本 cachedTextGenerator的行数不同会造成富文本的verts数量不同，所以这个需要区别
             // Apply the offset to the vertices
-            IList<UIVertex> verts = cachedTextGenerator.verts;//NOTE: 2019.1.5f1及以后版本 如果使用富文本，单行状态这里的verts数量是除去富文本格式之后的数量
+            IList<UIVertex> verts = cachedTextGenerator.verts;//如果使用富文本，这里的verts数量是除去富文本格式之后的数量
             float unitsPerPixel = 1 / pixelsPerUnit;
-            //Last 4 verts are always a new line... (\n) NOTE: 不做处理，会少字符
-            int vertCount = verts.Count;//- 4
+            // Last 4 verts are always a new line... (\n) 不做处理，可能会少字符
+            // NOTE: 2019.1.5f1及更高的版本中cachedTextGenerator的行数不同会造成富文本的verts数量不同，所以这个需要区别
+            int vertCount = verts.Count;// - 4;
 
             // We have no verts to process just return (case 1037923)
             if (vertCount <= 0)
@@ -261,14 +353,11 @@ namespace UnityEngine.UI
                 Vector2 uv = Vector2.zero;
                 for (int i = 0; i < vertCount; ++i)
                 {
-                    int index = i / 4;
                     int tempVertIndex = i & 3;
-
                     m_TempVerts[tempVertIndex] = verts[i];
                     m_TempVerts[tempVertIndex].position *= unitsPerPixel;
-
                     // 处理emoji的情况
-                    if (m_EmojisDic.TryGetValue(index, out info))
+                    if (m_EmojisDic.TryGetValue(i / 4, out info))
                     {
                         m_TempVerts[tempVertIndex].position -= repairVec;
                         if (info.type == MatchType.Emoji)
@@ -285,10 +374,8 @@ namespace UnityEngine.UI
                             m_TempVerts[tempVertIndex].position = m_TempVerts[0].position;
                         }
                     }
-
                     if (tempVertIndex == 3)
                         toFill.AddUIVertexQuad(m_TempVerts);
-
                 }
                 ComputeBoundsInfo(toFill);
                 DrawUnderLine(toFill);
@@ -296,7 +383,16 @@ namespace UnityEngine.UI
 
             m_DisableFontTextureRebuiltCallback = false;
 
-            StartCoroutine(ShowImages());
+            if (gameObject.activeSelf && gameObject.activeInHierarchy)
+                StartCoroutine(ShowImages());
+
+            if (m_OnPopulateMeshOverEvent != null)
+                m_OnPopulateMeshOverEvent();
+        }
+        public override void Rebuild(CanvasUpdate update)
+        {
+            StopCoroutine(ShowImages());
+            base.Rebuild(update);
         }
 
         #endregion
@@ -305,9 +401,9 @@ namespace UnityEngine.UI
 
         protected void ParseText(string mText)
         {
-            if (EmojiData == null)
+            if (EmojiData == null)//|| !Application.isPlaying)
             {
-                m_OutputText = mText;
+                m_HyperOutputText = mText;
                 return;
             }
 
@@ -374,6 +470,10 @@ namespace UnityEngine.UI
                             }
                         case MatchType.HyperLink:
                             {
+                                //NOTE: Unity 2019.2.11f1 版本的富文本处理调整了在 OnPopulateMesh 之前进行
+                                //      因此需要将富文本内容的 Index 去除这样点击区域和下划线的位置才是正确的
+                                //      Unity 2017.3.1f1 版本已进行对比验证此问题
+                                //      备注：在不同行数的时候引擎解析的长度会不同，所以Index是变化的，后面增加了Index的修正长度还是使用原长度
                                 m_Builder.Append(mText.Substring(textIndex, match.Index - textIndex));
                                 m_Builder.Append("<color=");
                                 m_Builder.Append(m_MatchResult.GetHexColor(color));
@@ -386,17 +486,11 @@ namespace UnityEngine.UI
                                 var href = new HrefInfo()
                                 {
                                     show = true,
-#if UNITY_2019_1_5_OR_NEWER
+                                    //#if UNITY_2019_2_OR_NEWER
                                     startIndex = temIndex * 4,
                                     reallyStartIndex = temReallyIndex * 4,
                                     endIndex = (temIndex + m_MatchResult.link.Length) * 4 - 1,
                                     reallyEndIndex = (temReallyIndex + m_MatchResult.link.Length) * 4 - 1,
-#else
-                                    startIndex = temIndex * 4,
-                                    reallyStartIndex = temReallyIndex * 4,
-                                    endIndex = temIndex * 4 - 1,
-                                    reallyEndIndex = (temReallyIndex + m_MatchResult.link.Length) * 4 - 1,
-#endif
                                     url = m_MatchResult.url,
                                     color = m_MatchResult.GetColor(color),
                                 };
@@ -450,23 +544,22 @@ namespace UnityEngine.UI
                     }
                 }
                 m_Builder.Append(mText.Substring(textIndex, mText.Length - textIndex));
-                m_OutputText = m_Builder.ToString();
+                m_HyperOutputText = m_Builder.ToString();
             }
             else
             {
-                m_OutputText = mText;
+                m_HyperOutputText = mText;
             }
 
-            matches = Regex.Matches(m_OutputText, m_RegexCustom);
+            matches = Regex.Matches(m_HyperOutputText, m_RegexCustom);
             for (int i = 0; i < matches.Count; i++)
             {
                 var match = matches[i];
                 if (match.Success && match.Groups.Count == 4)
                 {
                     Color lineColor;
-                    string v1 = match.Groups[1].Value;
-                    if (!string.IsNullOrEmpty(v1) && ColorUtility.TryParseHtmlString(v1, out lineColor)) { }
-                    else lineColor = color;
+                    if (!ColorUtility.TryParseHtmlString(match.Groups[1].Value, out lineColor))
+                        lineColor = color;
 
                     var subMatch = match.Groups[2];
                     var temIndex = GetReallyIndex(subMatch.Value);
@@ -483,14 +576,32 @@ namespace UnityEngine.UI
                 }
             }
         }
+        protected void ResetField()
+        {
+            m_Builder.Length = 0;
+            m_Emojis.Clear();
+            m_EmojisReallyIndex.Clear();
+            m_Hrefs.Clear();
+            m_Underlines.Clear();
+            ClearImages();
+        }
+        protected void CheckMaterial()
+        {
+            if (material != null)
+                return;
+
+            // 这里判断可根据项目需求进行拓展
+            material = EmojiMat();
+        }
         protected int GetReallyIndex(string currentMatch)
         {
             var texture = 0;
             var total = currentMatch;
             total = total.Replace(" ", string.Empty);
             var matchList = Regex.Matches(total, m_RegexRichFormat);
-            foreach (Match match in matchList)
+            for (int i = 0; i < matchList.Count; i++)
             {
+                var match = matchList[i];
                 if (!match.Success)
                     continue;
 
@@ -511,30 +622,18 @@ namespace UnityEngine.UI
             }
             return total.Length + texture;
         }
-        protected void ResetField()
-        {
-            m_Builder.Length = 0;
-            m_Emojis.Clear();
-            m_EmojisReallyIndex.Clear();
-            m_Hrefs.Clear();
-            m_Underlines.Clear();
-            ClearImages();
-        }
-        protected void CheckMaterial()
-        {
-            if (material != null)
-                return;
-
-            material = EmojiMat;
-        }
         protected void ComputeBoundsInfo(VertexHelper toFill)
         {
+            //CharVertsInfo charInfo = new CharVertsInfo();
             UIVertex vert = new UIVertex();
             for (int u = 0; u < m_Underlines.Count; u++)
             {
                 var underline = m_Underlines[u];
                 underline.boxes.Clear();
+                //underline.charswidth.Clear();
+#if UNITY_2019_1_OR_NEWER
                 underline.CorrectionIndex(m_IsMultiLine);
+#endif
                 if (underline.startIndex >= toFill.currentVertCount)
                     continue;
 
@@ -544,7 +643,8 @@ namespace UnityEngine.UI
                 var bounds = new Bounds(pos, Vector3.zero);
                 for (int i = underline.startIndex, m = underline.endIndex; i < m; i++)
                 {
-                    if (i >= toFill.currentVertCount) break;
+                    if (i >= toFill.currentVertCount)
+                        break;
 
                     toFill.PopulateUIVertex(ref vert, i);
                     pos = vert.position;
@@ -553,25 +653,43 @@ namespace UnityEngine.UI
                         //if in different lines
                         underline.boxes.Add(new Rect(bounds.min, bounds.size));
                         bounds = new Bounds(pos, Vector3.zero);
+                        //underline.charswidth.Add(charInfo);
+                        //charInfo = new CharVertsInfo();
                     }
                     else
                     {
                         bounds.Encapsulate(pos); //expand bounds
+                        //if (i % 4 == 2)
+                        //{
+                        //    toFill.PopulateUIVertex(ref vert, i + 1);
+                        //    charInfo.charswidth.Add(vert.position.x - pos.x);
+                        //    charInfo.minPoslist.Add(new Vector3(pos.x, bounds.min.y));
+                        //}
                     }
                 }
                 //add bound
                 underline.boxes.Add(new Rect(bounds.min, bounds.size));
+                //underline.charswidth.Add(charInfo);
             }
         }
         protected void DrawUnderLine(VertexHelper toFill)
         {
+            if (!IsDrawUnderLine)
+                return;
+
             if (m_Underlines.Count <= 0)
                 return;
 
-            Vector2 extents = rectTransform.rect.size;
+            var extents = rectTransform.rect.size;
             var settings = GetGenerationSettings(extents);
             cachedTextGenerator.Populate("_", settings);
+
             IList<UIVertex> uList = cachedTextGenerator.verts;
+            if (uList.Count < 4)
+                return;
+
+            float w_offset = 0.2f;
+            float h_offset = 1.5f;
             float h = uList[2].position.y - uList[1].position.y;
             Vector3[] temVecs = new Vector3[4];
 
@@ -587,15 +705,39 @@ namespace UnityEngine.UI
                     if (box.width <= 0 || box.height <= 0)
                         continue;
 
+                    // NOTE: 如果使用一个下划线，文本太长时两端会被拉伸到透明
+
+                    // 每个字单独计算下划线
+                    //var widthinfo = info.charswidth[j];
+                    //for (int o = 0; o < widthinfo.charswidth.Count; o++)
+                    //{
+                    //    var width = widthinfo.charswidth[o];
+                    //    var minPos = widthinfo.minPoslist[o];
+                    //    temVecs[0] = minPos + new Vector3(width * (0 - w_offset), h_offset + 0);
+                    //    temVecs[1] = minPos + new Vector3(width * (1 + w_offset), h_offset + 0);
+                    //    temVecs[2] = minPos + new Vector3(width * (1 + w_offset), h_offset + h);
+                    //    temVecs[3] = minPos + new Vector3(width * (0 - w_offset), h_offset + h);
+
+                    //    for (int k = 0; k < 4; k++)
+                    //    {
+                    //        m_TempVerts[k] = uList[k];
+                    //        m_TempVerts[k].color = info.color;
+                    //        m_TempVerts[k].position = temVecs[k];
+                    //    }
+
+                    //    toFill.AddUIVertexQuad(m_TempVerts);
+                    //}
+
+                    // 平均计算的下划线
                     var basePos = box.min;
                     var popWidth = (info.endIndex - info.startIndex) / 4f;
                     var w = box.width / popWidth;
                     for (int p = 0; p < popWidth; p++)
                     {
-                        temVecs[0] = basePos - new Vector2(w * 0.2f, 0);
-                        temVecs[1] = basePos + new Vector2(w * 1.2f, 0);
-                        temVecs[2] = basePos + new Vector2(w * 1.2f, h);
-                        temVecs[3] = basePos + new Vector2(0, h);
+                        temVecs[0] = basePos + new Vector2(w * (0 - w_offset), h_offset + 0);
+                        temVecs[1] = basePos + new Vector2(w * (1 + w_offset), h_offset + 0);
+                        temVecs[2] = basePos + new Vector2(w * (1 + w_offset), h_offset + h);
+                        temVecs[3] = basePos + new Vector2(w * (0 - w_offset), h_offset + h);
 
                         for (int k = 0; k < 4; k++)
                         {
@@ -610,6 +752,7 @@ namespace UnityEngine.UI
                 }
             }
         }
+
         protected void ClearImages()
         {
             for (int i = 0; i < m_Images.Count; i++)
@@ -627,17 +770,20 @@ namespace UnityEngine.UI
                 {
                     emojiInfo.texture.image = GetImage(emojiInfo.texture, emojiInfo.width, emojiInfo.height);
 #if UNITY_EDITOR
-                    if (Application.isEditor)
+                    if (Application.isEditor && !Application.isPlaying)
+                    {
                         emojiInfo.texture.image.sprite = LoadAssets<Sprite>(emojiInfo.texture.link);
+                        continue;
+                    }
 #endif
-                    if (EmojiFillHandler != null)
-                        EmojiFillHandler(emojiInfo.texture.image, emojiInfo.texture.link);
+                    if (m_EmojiFillHandler != null)
+                        m_EmojiFillHandler(emojiInfo.texture.image, emojiInfo.texture.link);
                 }
                 else if (emojiInfo.type == MatchType.CustomFill)
                 {
                     emojiInfo.texture.rect = GetRectTransform(emojiInfo.texture, emojiInfo.width, emojiInfo.height);
 #if UNITY_EDITOR
-                    if (Application.isEditor)
+                    if (Application.isEditor && !Application.isPlaying)
                     {
                         GameObject obj = null;
                         var index = emojiInfo.texture.index;
@@ -657,10 +803,11 @@ namespace UnityEngine.UI
                         objRect.SetParent(emojiInfo.texture.rect);
                         objRect.localScale = Vector3.one;
                         objRect.anchoredPosition = Vector2.zero;
+                        continue;
                     }
 #endif
-                    if (CustomFillHandler != null)
-                        CustomFillHandler(emojiInfo.texture.rect, emojiInfo.texture.link);
+                    if (m_CustomFillHandler != null)
+                        m_CustomFillHandler(emojiInfo.texture.rect, emojiInfo.texture.link);
                 }
             }
         }
@@ -685,10 +832,9 @@ namespace UnityEngine.UI
                     m_Images.Add(img);
             }
 
-            img.rectTransform.localPosition = Vector3.zero;
             img.rectTransform.localScale = Vector3.one;
             img.rectTransform.sizeDelta = new Vector2(width, height);
-            img.rectTransform.anchoredPosition = info.position;
+            img.rectTransform.anchoredPosition3D = info.position;
             return img;
         }
         protected RectTransform GetRectTransform(TextureInfo info, int width, int height)
@@ -710,10 +856,9 @@ namespace UnityEngine.UI
                 else
                     m_Rects.Add(rect);
             }
-            rect.localPosition = Vector3.zero;
             rect.localScale = Vector3.one;
             rect.sizeDelta = new Vector2(width, height);
-            rect.anchoredPosition = info.position;
+            rect.anchoredPosition3D = info.position;
             return rect;
         }
         protected T GetOrAddComponent<T>(string name, int index) where T : Component
@@ -728,7 +873,7 @@ namespace UnityEngine.UI
         protected GameObject GetGameObject(string name, int index)
         {
             var key = name + index;
-            List<GameObject> list = new List<GameObject>();
+            var list = new List<GameObject>();
             if (m_GameObjects.ContainsKey(key))
                 list = m_GameObjects[key];
             else
@@ -746,6 +891,7 @@ namespace UnityEngine.UI
                 else
                     go = child.gameObject;
 
+                go.layer = gameObject.layer;
                 if (list.Count > index)
                     list[index] = go;
                 else
@@ -843,9 +989,10 @@ namespace UnityEngine.UI
                     link = match.Groups[6].Value.Substring(1);
                 }
 
-                if (title.Equals("0x01")) //hyper link
+                if (title.Equals("0x01"))
                 {
-                    if (/*!string.IsNullOrEmpty(url) &&*/ !string.IsNullOrEmpty(link))
+                    // url 是否为空 不影响超链接的判定
+                    if (!string.IsNullOrEmpty(link))
                         type = MatchType.HyperLink;
                 }
                 else if (title.Equals("0x02"))
@@ -889,6 +1036,8 @@ namespace UnityEngine.UI
             public int reallyEndIndex;//祛除富文本的index
             public Color color;
             public readonly List<Rect> boxes = new List<Rect>();
+            public readonly List<CharVertsInfo> charswidth = new List<CharVertsInfo>();
+
             public void CorrectionIndex(bool isMultiLine)
             {
                 if (isMultiLine)
@@ -905,6 +1054,11 @@ namespace UnityEngine.UI
         protected class HrefInfo : UnderlineInfo
         {
             public string url;
+        }
+        protected class CharVertsInfo
+        {
+            public List<float> charswidth = new List<float>();
+            public List<Vector3> minPoslist = new List<Vector3>();
         }
 
         #endregion

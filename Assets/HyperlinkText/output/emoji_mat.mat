@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: emoji
+  m_Name: emoji_mat
   m_Shader: {fileID: 4800000, guid: 159a9e1ec7b0e754587e8ff668a34ba7, type: 3}
   m_ShaderKeywords: UNITY_UI_CLIP_RECT
   m_LightmapFlags: 4

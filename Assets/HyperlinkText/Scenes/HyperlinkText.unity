@@ -536,7 +536,7 @@ GameObject:
   - component: {fileID: 687069203}
   - component: {fileID: 687069205}
   - component: {fileID: 687069204}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: emoji_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -558,7 +558,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 44, y: -35}
+  m_AnchoredPosition: {x: 73, y: -47}
   m_SizeDelta: {x: 30, y: 30}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &687069204
@@ -580,7 +580,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 46d3effbdd5e2914a922871bf2534c9a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 40ef85fe46cb70c4fa10bdb2182392c5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -865,6 +865,8 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u662F\u6211{0x02#\u573A\u94FE\u63A5\u554A=Icons/1}\u8BD5\u8BD5\u6C34->{0x01#0000ff#cc=\u8D85\u94FE\u63A5}<-rqwerw\u662F\u7684\u6025\u6025\u6025\u662F\u7684->{0x01#cc=\u8D85\u94FE\u63A5}<-\u6025\u6025\u6025"
+  IsDrawUnderLine: 1
+  EmojiType: Test
 --- !u!222 &1034795673
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -939,7 +941,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u662F\u6211{0x02#\u573A\u94FE\u63A5\u554A=Icons/1}\u8BD5\u8BD5\u6C34->{0x01#0000ff#cc=\u8D85\u94FE\u63A5}<-rqwerw\u662F\u7684\u6025\u6025\u6025\u662F\u7684->{0x01#cc=\u8D85\u94FE\u63A5}<-\u6025\u6025\u6025 "
+  m_Text: "\u662F\u6211{0x02#\u573A\u94FE\u63A5\u554A=Icons/1}\u8BD5\u8BD5\u6C34->{0x01#0000ff#cc=\u8D85\u94FE\u63A5}<-rqwerw\u662F\u7684\u6025\u6025\u6025\u662F\u7684->{0x01#cc=\u8D85\u94FE\u63A5}<-\u6025\u6025\u6025
+    \     "
+  IsDrawUnderLine: 1
+  EmojiType: Test
 --- !u!222 &1526294959
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1093,7 +1098,7 @@ GameObject:
   - component: {fileID: 1670760245}
   - component: {fileID: 1670760247}
   - component: {fileID: 1670760246}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: emoji_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1115,7 +1120,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -147, y: 18.5}
+  m_AnchoredPosition: {x: -200, y: 24.5}
   m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1670760246
@@ -1137,7 +1142,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 46d3effbdd5e2914a922871bf2534c9a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 40ef85fe46cb70c4fa10bdb2182392c5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

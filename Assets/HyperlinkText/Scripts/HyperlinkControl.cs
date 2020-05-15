@@ -28,9 +28,9 @@ public class HyperlinkControl : MonoBehaviour
             //objRect.localScale = Vector3.one;
             //objRect.anchoredPosition = Vector2.zero;
         });
-        Hyperlink.SetHyperlinkListener(content =>
+        Hyperlink.SetHyperlinkListener((index, content) =>
         {
-            Debug.LogError("HyperlinkText Clicked !! --> " + content);
+            Debug.LogError("HyperlinkText Clicked !! --> " + index + " --> " + content);
         });
     }
 
