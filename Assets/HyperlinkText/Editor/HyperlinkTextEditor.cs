@@ -11,41 +11,51 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEditor;
+using Object = UnityEngine.Object;
 
+[CustomEditor(typeof(HyperlinkText), true)]
+[CanEditMultipleObjects]
 public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
 {
 
     #region 创建UI
 
-    private static int currentPickerWindow = -1;
-    private const string m_ShaderSearchFilter = "emoji";
-    private const string m_ShaderSearchType = " t:Shader";
-    private const string m_EmojiShaderKey = "HyperlinkEmojiShader";
-    private const string m_MaterialSearchFilter = "emoji";
-    private const string m_MaterialSearchType = " t:Material";
-    private const string m_EmojiMaterialKey = "HyperlinkEmojiMaterial";
-    private static string m_DefaultEmojiMaterialPath
+    private Material m_Selection;
+    private static bool m_ShowPickerWindow = false;
+    private static string m_DefaultEmojiMaterialPath = "Assets/Resources/HyperlinkText/Emoji/Default/default_mat.mat";
+    private SerializedProperty m_EmojiType;
+
+    protected override void OnEnable()
     {
-        get
-        {
-            var nativeCache = PlayerPrefs.GetString(m_EmojiMaterialKey);
-            if (string.IsNullOrEmpty(nativeCache))
-                return "Assets/HyperlinkText/output/emoji.mat";
-
-            return nativeCache;
-        }
+        m_EmojiType = serializedObject.FindProperty("EmojiType");
+        base.OnEnable();
     }
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+        serializedObject.Update();
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(m_EmojiType);
 
-    //public override void OnInspectorGUI()
-    //{
-    //    base.OnInspectorGUI();
+        if (m_ShowPickerWindow)
+        {
+            m_ShowPickerWindow = false;
+            var controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard);
+            EditorGUIUtility.ShowObjectPicker<Material>(m_Selection, false, "emoji_mat", controlID);
+            m_Selection = EditorGUIUtility.GetObjectPickerObject() as Material;
+        }
+        if (Event.current.commandName == "ObjectSelectorUpdated")
+        {
 
-    //    if (Event.current.commandName == "ObjectSelectorUpdated" && EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
-    //    {
-    //        currentPickerWindow = -1;
+        }
+        else if (Event.current.commandName == "ObjectSelectorClosed")
+        {
 
-    //    }
-    //}
+        }
+
+        if (EditorGUI.EndChangeCheck())
+            serializedObject.ApplyModifiedProperties();
+    }
 
     [MenuItem("GameObject/UI/HyperlinkText", false, 1999)]
     static public void AddHyperlinkText(MenuCommand menuCommand)
@@ -57,51 +67,11 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
     {
         //DefaultControls.CreateText(new DefaultControls.Resources());
         var go = CreateUIElement("HyperlinkText", new Vector2(200, 30));
-        var text = go.AddComponent<HyperlinkText>();
-        text.text = "New HyperlinkText";
-        CheckMaterial(text);
-        return text;
-    }
-    private static Material CheckMaterial(HyperlinkText text)
-    {
-        Material material = null;
-        var removeIndex = m_DefaultEmojiMaterialPath.LastIndexOf("/");
-        var matPath = m_DefaultEmojiMaterialPath.Remove(removeIndex);
-        if (AssetDatabase.IsValidFolder(matPath))
-        {
-            material = AssetDatabase.LoadAssetAtPath<Material>(m_DefaultEmojiMaterialPath);
-        }
-        else
-        {
-            material = PickerTypeOf(text.material, m_EmojiMaterialKey, new string[] { "", "mat" });
-            //material = PickerTypeOf(text.material, m_MaterialSearchFilter);
-            //PlayerPrefs.SetString(m_EmojiMaterialKey, AssetDatabase.GetAssetPath(material));
-        }
-        if (material.shader == null)
-        {
-            material.shader = PickerTypeOf(material.shader, m_EmojiShaderKey, new string[] { "", "shader" });
-            //material.shader = PickerTypeOf(material.shader, m_ShaderSearchFilter);
-            //PlayerPrefs.SetString(m_EmojiShaderKey, AssetDatabase.GetAssetPath(material.shader));
-        }
-        text.material = material;
-        return material;
-    }
-    private static T PickerTypeOf<T>(T selection, string savedKey, string[] filterType) where T : UnityEngine.Object
-    {
-        var path = EditorUtility.OpenFilePanelWithFilters("请选择Emoji材质路径", Application.dataPath, filterType);
-        var startIndex = path.IndexOf("Assets");
-        path = path.Substring(startIndex);
-        path.Replace('\\', '/');
-        var asset = AssetDatabase.LoadAssetAtPath<T>(path);
-        PlayerPrefs.SetString(savedKey, path);
-        return asset;
-    }
-    private static T PickerTypeOf<T>(T selection, string filterType, FocusType focusType = FocusType.Passive, bool allowSceneObjs = false) where T : UnityEngine.Object
-    {
-        //currentPickerWindow = EditorGUIUtility.GetControlID(focusType) + 100;
-        var controlID = EditorGUIUtility.GetControlID(focusType);
-        EditorGUIUtility.ShowObjectPicker<T>(selection, allowSceneObjs, filterType, controlID);
-        return EditorGUIUtility.GetObjectPickerObject() as T;
+        var hyperText = go.AddComponent<HyperlinkText>();
+        hyperText.text = "New HyperlinkText";
+        hyperText.material = AssetDatabase.LoadAssetAtPath<Material>(m_DefaultEmojiMaterialPath);
+        //CheckMaterial(hyperText);
+        return hyperText;
     }
     private static GameObject CreateUIElement(string name, Vector2 size)
     {
@@ -230,99 +200,133 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
         return root;
     }
 
+    private static void CheckMaterial(HyperlinkText text)
+    {
+        // 默认材质都为 Emoji
+        Material material = null;
+        var matPath = m_DefaultEmojiMaterialPath;
+        if (File.Exists(matPath))
+        {
+            material = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+        }
+        // 没有必要再去检测和创建，在创建图集的时候已经创建了资源，如果没有就空置 Text 的材质
+        if (PickerTypeOf(new string[] { "", "mat" }, ref material))
+        {
+            material.shader = Shader.Find("UI/EmojiFont");
+        }
+        else
+        {
+            material = new Material(Shader.Find("UI/EmojiFont"));
+            var removeIndex = matPath.LastIndexOf("/");
+            var defaultPath = matPath.Remove(removeIndex);
+            AssetDatabase.CreateAsset(material, defaultPath);
+        }
+        text.material = material;
+    }
+    private static bool PickerTypeOf<T>(string[] filterType, ref T assets) where T : UnityEngine.Object
+    {
+        if (assets != null)
+            return true;
+
+        var path = EditorUtility.OpenFilePanelWithFilters("请选择Emoji材质路径", Application.dataPath, filterType);
+        var startIndex = path.IndexOf("Assets");
+        path = path.Substring(startIndex);
+        path.Replace('\\', '/');
+        assets = AssetDatabase.LoadAssetAtPath<T>(path);
+        return assets;
+    }
+
     #endregion
 
     #region 创建Emoji表情图集
 
-    static int progress = 0, totalProgress = 0;
-    static void UpdateProgressBar(string info)
+    private const string Title = "Hyperlink Text";
+    [MenuItem("Tools/Build Emoji Packer &R")]
+    static void EmojiPacker()
     {
-        EditorUtility.DisplayProgressBar("Hyperlink Text", info, ++progress / totalProgress);//更新已选中Emoji表情图集中...
+        var searchWindow = EditorTools.CreatePathSelectWindow("Emoji 资源选择", new Vector2(300, 500), string.Empty, false);
+        searchWindow.SearchPath = "Assets/HyperlinkText/Emoji";
+        searchWindow.OutputPath = "Assets/Resources/HyperlinkText/Emoji";
+        searchWindow.SetCloseListener((objlist, pngList) =>
+        {
+            for (int i = 0; i < objlist.Count; i++)
+            {
+                Selection.activeObject = objlist[i];
+                BuildEmoji(pngList[i]);
+                EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath(pngList[i], typeof(Object)));
+            }
+        });
     }
-    static void ResetProgressBar(int total = 0)
+    static void BuildEmoji(string pngPath)
     {
-        progress = 0;
-        totalProgress = total;
-        EditorUtility.ClearProgressBar();
-    }
-
-    [MenuItem("Tools/Emoji Build &R")]
-    static void Build()
-    {
-        Dictionary<string, List<AssetInfo>> dic = new Dictionary<string, List<AssetInfo>>();
+        Dictionary<string, List<AssetInfo>> textureAssetsDic = new Dictionary<string, List<AssetInfo>>();
         Texture2D[] textures = Selection.GetFiltered<Texture2D>(SelectionMode.DeepAssets);
 
-        ResetProgressBar(textures.Length);
-        // get all select textures
-        int totalFrames = 0;
-        int size = 0;
+        EditorTools.ResetProgressBar(textures.Length);
+        int totalFrames = 0, size = 0;
         foreach (var texture in textures)
         {
-            Match match = Regex.Match(texture.name, "^([a-zA-Z0-9]+)(_([0-9]+))?$");//name_idx; name
+            if (texture == null)
+                continue;
+
+            var match = Regex.Match(texture.name, "^(([a-zA-Z0-9]+(-?))+)(_([0-9]+))?$");//name_index or name (name = xxx-xxx-xxx...)
             if (!match.Success)
             {
-                Debug.Log(texture.name + " 不匹配命名规则，跳过.");
+                Debug.Log(texture.name + " 不匹配命名规则，跳过\n");
                 continue;
             }
             int index;
             if (!int.TryParse(match.Groups[3].Value, out index))
-            {
                 index = 1;
-            }
 
             List<AssetInfo> infos;
             string title = match.Groups[1].Value;
-            if (!dic.TryGetValue(title, out infos))
+            if (!textureAssetsDic.TryGetValue(title, out infos))
             {
                 infos = new List<AssetInfo>();
-                dic.Add(title, infos);
+                textureAssetsDic.Add(title, infos);
             }
             infos.Add(new AssetInfo() { index = index, texture = texture });
 
-            if (texture.width > size)
-                size = texture.width;
-            if (texture.height > size)
-                size = texture.width;
+            size = Math.Max(texture.width, size);
+            size = Math.Max(texture.height, size);
 
             totalFrames++;
-            UpdateProgressBar("正在过滤已选中表情...");
+            EditorTools.UpdateProgressBar(Title, "正在过滤选中表情...{0}", texture.name);
         }
 
-        ResetProgressBar(dic.Values.Count);
-        // sort frames
-        foreach (var info in dic.Values)
+        EditorTools.ResetProgressBar(textureAssetsDic.Values.Count);
+        foreach (var info in textureAssetsDic.Values)
         {
-            info.Sort(new Comparison<AssetInfo>((a, b) => a.index <= b.index ? 1 : 0));
-            UpdateProgressBar("表情组合排序中...");
+            info.Sort((x, y) => y.index - x.index);
+            EditorTools.UpdateProgressBar(Title, "正在进行动态表情排序...");
         }
 
-        // compute atlas size, support n*n only
+        if (totalFrames == 0)
+            return;
+
+        // 计算图集大小 仅支持 2^n
         int lineCount = 0;
         int texSize = ComputeAtlasSize(totalFrames, ref size, ref lineCount);
         if (texSize < 1)
         {
             EditorUtility.DisplayDialog("Hyperlink Text", "未能构建合适大小的图集", "退出");
+            EditorTools.ResetProgressBar();
             return;
         }
 
-        // sort keys
-        var keys = dic.Keys.ToList();
-        keys.Sort(new Comparison<string>((a, b) => String.Compare(a, b, StringComparison.Ordinal)));
+        var keys = textureAssetsDic.Keys.ToList();
+        keys.Sort((a, b) => string.Compare(a, b, StringComparison.Ordinal));
 
-        int total = 0;
-        foreach (var key in keys)
-        {
-            total += dic[key].Count;
-        }
-        ResetProgressBar(total);
-        // build atlas
+        EditorTools.ResetProgressBar(totalFrames);
         List<SpriteInfo> sprites = new List<SpriteInfo>();
         Texture2D atlas = new Texture2D(texSize, texSize);
         int idx = 0;
         foreach (var key in keys)
         {
-            sprites.Add(new SpriteInfo(key, dic[key].Count, idx));
-            foreach (var assetInfo in dic[key])
+            var assetsInfoList = textureAssetsDic[key];
+            sprites.Add(new SpriteInfo(key, assetsInfoList.Count, idx));
+            foreach (var assetInfo in assetsInfoList)
             {
                 int w = assetInfo.texture.width;
                 int h = assetInfo.texture.height;
@@ -334,40 +338,37 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
                 atlas.SetPixels(x * size, y * size, w, h, colors);
 
                 idx++;
-                UpdateProgressBar("生成图集中...");
+                EditorTools.UpdateProgressBar(Title, "正在生成图集...{0}", key);
             }
         }
 
-        ResetProgressBar(sprites.Count);
-        // build emoji config
+        EditorTools.ResetProgressBar(sprites.Count);
         StringBuilder builder = new StringBuilder();
         builder.AppendLine("Key\tFrame\tIndex");
         foreach (var spriteInfo in sprites)
         {
             builder.AppendLine(spriteInfo.ToString());
-            UpdateProgressBar("生成配置表中...");
+            EditorTools.UpdateProgressBar(Title, "正在生成配置表...{0}", spriteInfo.ToString());
         }
 
-        ResetProgressBar();
-        // select save folder
-        string pngPath = EditorUtility.SaveFilePanelInProject("Select Save Path", "emoji", "png", "");
+        EditorTools.ResetProgressBar();
+        //string pngPath = EditorUtility.SaveFilePanel("Select Save Path", "Assets/Resources/HyperlinkText/Emoji", "default", "png");
         if (string.IsNullOrEmpty(pngPath))
             return;
 
-        var txtPath = pngPath.Replace(".png", ".txt");
+        var txtPath = pngPath.Replace(".png", "_config.txt");
         byte[] bytes = atlas.EncodeToPNG();
         File.WriteAllBytes(pngPath, bytes);
         File.WriteAllText(txtPath, builder.ToString());
         AssetDatabase.ImportAsset(pngPath);
 
-        // create material
-        var matPath = pngPath.Replace(".png", ".mat");
-        Shader shader = Shader.Find("UI/EmojiFont");
-        var hasMat = Path.HasExtension(matPath);
-        Material material = hasMat ? AssetDatabase.LoadAssetAtPath<Material>(matPath) : new Material(shader);
-        Texture2D emojiTex = AssetDatabase.LoadAssetAtPath<Texture2D>(pngPath);
+        var matPath = pngPath.Replace(".png", "_mat.mat");
+        var shader = Shader.Find("UI/EmojiFont");
+        var hasMat = File.Exists(matPath);
+        var material = hasMat ? AssetDatabase.LoadAssetAtPath<Material>(matPath) : new Material(shader);
+        var emojiTex = AssetDatabase.LoadAssetAtPath<Texture2D>(pngPath);
         material.SetTexture("_EmojiTex", emojiTex);
-        material.SetFloat("_EmojiSize", size * 1.0f / texSize);
+        material.SetFloat("_EmojiSize", (float)size / texSize);
         material.SetFloat("_LineCount", lineCount);
         if (hasMat)
         {
@@ -379,19 +380,20 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
         {
             AssetDatabase.CreateAsset(material, matPath);
         }
-
         AssetDatabase.Refresh();
     }
-    static int ComputeAtlasSize(int count, ref int size, ref int x)
+    static int ComputeAtlasSize(int count, ref int size, ref int lineCount)
     {
         size = GetWrapSize(size);
         int total = count * size * size;
-        for (int i = 5; i < 12; i++)
+        // 最大图集2048 这里先取消这个控制
+        for (int i = 5; i < int.MaxValue; i++)
         {
             int w = (int)Mathf.Pow(2, i);
             if (total <= w * w)
             {
-                x = w / size;
+                lineCount = w / size;
+                Debug.LogErrorFormat("Atlas Size: [{0}]        LineCount: [{1}]\n", w, lineCount);
                 return w;
             }
         }
@@ -399,12 +401,14 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
     }
     static int GetWrapSize(int size)
     {
-        //最大图集2048
         for (int i = 0; i < 12; i++)
         {
             int s = (int)Mathf.Pow(2, i);
-            if (s >= size)
-                return s;
+            if (s < size)
+                continue;
+
+            Debug.LogErrorFormat("Single Emoji Size: [{0}]        Original Emoji Size: [{1}]\n", s, size);
+            return s;
         }
 
         return 0;

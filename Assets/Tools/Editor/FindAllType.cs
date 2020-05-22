@@ -16,7 +16,7 @@ public class FindAllType : EditorWindow
     private string m_Default = "*.";
     private string m_Extension = "dds";
     private List<Object> m_TargetList = new List<Object>();
-    private UnityEngine.Vector3 m_ScrollPos = Vector2.zero;
+    private Vector3 m_ScrollPos = Vector2.zero;
 
     [MenuItem("查找工具/查找所有指定后缀文件")]
     public static void Create()
@@ -29,6 +29,18 @@ public class FindAllType : EditorWindow
     void OnGUI()
     {
         GUILayout.Space(10);
+
+        //if (GUILayout.Button("路径选择"))
+        //{
+        //    var path = EditorUtility.OpenFolderPanel("选择目标路径", "Assets", "Assets");
+        //    string[] paths = Directory.GetFiles(path);
+        //    for (int i = 0; i < paths.Length; i++)
+        //    {
+        //        Debug.LogError(paths[i]);
+        //    }
+        //}
+
+        //GUILayout.Space(10);
 
         GUILayout.BeginHorizontal(m_GUIStyle);
         {
