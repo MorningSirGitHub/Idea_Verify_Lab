@@ -800,8 +800,8 @@ RectTransform:
   m_Father: {fileID: 2122003755}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 300, y: 0}
   m_SizeDelta: {x: 600, y: 0}
   m_Pivot: {x: 0.5, y: 1}
@@ -1145,6 +1145,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: "\u662F\u6211{0x02#\u573A\u94FE\u63A5\u554A=HyperlinkText/Icons/1}\u8BD5\u8BD5\u6C34->{0x01#0000ff#cc=\u8D85\u94FE\u63A5}<-rqwerw\u662F\u7684\u6025\u6025\u6025\u662F\u7684->{0x01#cc=\u8D85\u94FE\u63A5}<-\u6025\u6025\u6025"
   IsDrawUnderLine: 1
+  AutoFillEmoji: 0
   EmojiType: Test
 --- !u!222 &1034795673
 CanvasRenderer:
@@ -1222,6 +1223,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: "\u662F\u6211{0x02|60|60#\u573A\u94FE\u63A5\u554A=HyperlinkText/Icons/1}\u8BD5\u8BD5\u6C34->{0x01##0000ff#cc=\u8D85\u94FE\u63A5}<-rqwerw\u662F\u7684\u6025\u6025\u6025\u662F\u7684->{0x01#cc=\u8D85\u94FE\u63A5}<-\u6025\u6025\u6025{1}"
   IsDrawUnderLine: 1
+  AutoFillEmoji: 0
   EmojiType: Test
 --- !u!222 &1161902120
 CanvasRenderer:
@@ -1298,6 +1300,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: 
   IsDrawUnderLine: 1
+  AutoFillEmoji: 0
   EmojiType: Default
 --- !u!222 &1310311135
 CanvasRenderer:
@@ -1511,6 +1514,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: '{1f31f}{1f600}<size=25>123</size>ww{1f308}'
   IsDrawUnderLine: 1
+  AutoFillEmoji: 0
   EmojiType: Default
 --- !u!222 &1742622390
 CanvasRenderer:
@@ -1656,6 +1660,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: "{1f603}13{1f32b}qe{0x01##00ff00#!=\u8D85\u94FE\u63A5}{1f30c}"
   IsDrawUnderLine: 1
+  AutoFillEmoji: 0
   EmojiType: Default
 --- !u!222 &1926920874
 CanvasRenderer:

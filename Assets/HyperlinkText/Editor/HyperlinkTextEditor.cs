@@ -22,21 +22,29 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
 
     private Material m_Selection;
     private static bool m_ShowPickerWindow = false;
-    private static string m_DefaultEmojiMaterialPath = "Assets/Resources/HyperlinkText/Emoji/Default/default_mat.mat";
+    private static string m_DefaultEmojiMaterialPath = "Assets/Resources/Emoji/Default/default_mat.mat";
+    private SerializedProperty m_UnderLineOffset;
+    private static HyperlinkText m_HyperlinkText;
     private SerializedProperty m_EmojiType;
 
     protected override void OnEnable()
     {
+        m_HyperlinkText = target as HyperlinkText;
         m_EmojiType = serializedObject.FindProperty("EmojiType");
+        m_UnderLineOffset = serializedObject.FindProperty("UnderLineOffset");
+
         base.OnEnable();
     }
     public override void OnInspectorGUI()
     {
-        base.OnInspectorGUI();
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(m_EmojiType);
 
+        base.OnInspectorGUI();
+        EditorGUILayout.PropertyField(m_EmojiType);
+        EditorGUILayout.PropertyField(m_UnderLineOffset);
+
+        //if (GUILayout.Button("ShowPickerWindow"))
         if (m_ShowPickerWindow)
         {
             m_ShowPickerWindow = false;
@@ -69,6 +77,10 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
         var go = CreateUIElement("HyperlinkText", new Vector2(200, 30));
         var hyperText = go.AddComponent<HyperlinkText>();
         hyperText.text = "New HyperlinkText";
+        hyperText.font = Font.CreateDynamicFontFromOSFont("Arial", 20);
+        hyperText.alignment = TextAnchor.MiddleCenter;
+        hyperText.supportRichText = true;
+        hyperText.raycastTarget = true;
         hyperText.material = AssetDatabase.LoadAssetAtPath<Material>(m_DefaultEmojiMaterialPath);
         //CheckMaterial(hyperText);
         return hyperText;
@@ -241,13 +253,14 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
     #region 创建Emoji表情图集
 
     private const string Title = "Hyperlink Text";
+
     [MenuItem("Tools/Build Emoji Packer &R")]
     static void EmojiPacker()
     {
         var searchWindow = EditorTools.CreatePathSelectWindow("Emoji 资源选择", new Vector2(300, 500), string.Empty, false);
-        searchWindow.SearchPath = "Assets/HyperlinkText/Emoji";
-        searchWindow.OutputPath = "Assets/Resources/HyperlinkText/Emoji";
-        searchWindow.SetCloseListener((objlist, pngList) =>
+        searchWindow.SearchPath = "Assets/EmojiSource";
+        searchWindow.OutputPath = "Assets/Resources/Emoji";
+        searchWindow.SetOKListener((objlist, pngList) =>
         {
             for (int i = 0; i < objlist.Count; i++)
             {
@@ -325,7 +338,7 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
         foreach (var key in keys)
         {
             var assetsInfoList = textureAssetsDic[key];
-            sprites.Add(new SpriteInfo(key, assetsInfoList.Count, idx));
+            sprites.Add(new SpriteInfo(key, assetsInfoList.Count, idx, idx / lineCount, idx % lineCount));
             foreach (var assetInfo in assetsInfoList)
             {
                 int w = assetInfo.texture.width;
@@ -344,7 +357,7 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
 
         EditorTools.ResetProgressBar(sprites.Count);
         StringBuilder builder = new StringBuilder();
-        builder.AppendLine("Key\tFrame\tIndex");
+        builder.AppendLine("Key\tFrame\tIndex\tLineNum\tLineIndex");
         foreach (var spriteInfo in sprites)
         {
             builder.AppendLine(spriteInfo.ToString());
@@ -352,7 +365,7 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
         }
 
         EditorTools.ResetProgressBar();
-        //string pngPath = EditorUtility.SaveFilePanel("Select Save Path", "Assets/Resources/HyperlinkText/Emoji", "default", "png");
+        //string pngPath = EditorUtility.SaveFilePanel("Select Save Path", "Assets/_Res/UI/Sprites/ResourcesAB/Emoji", "default", "png");
         if (string.IsNullOrEmpty(pngPath))
             return;
 
@@ -386,14 +399,14 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
     {
         size = GetWrapSize(size);
         int total = count * size * size;
-        // 最大图集2048 这里先取消这个控制
-        for (int i = 5; i < int.MaxValue; i++)
+        // 最大图集2048
+        for (int i = 5; i < 12; i++)
         {
             int w = (int)Mathf.Pow(2, i);
             if (total <= w * w)
             {
                 lineCount = w / size;
-                Debug.LogErrorFormat("Atlas Size: [{0}]        LineCount: [{1}]\n", w, lineCount);
+                Debug.LogFormat("Atlas Size: [{0}]        LineCount: [{1}]\n", w, lineCount);
                 return w;
             }
         }
@@ -407,7 +420,7 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
             if (s < size)
                 continue;
 
-            Debug.LogErrorFormat("Single Emoji Size: [{0}]        Original Emoji Size: [{1}]\n", s, size);
+            Debug.LogFormat("Single Emoji Size: [{0}]        Original Emoji Size: [{1}]\n", s, size);
             return s;
         }
 
@@ -423,17 +436,22 @@ public class HyperlinkTextEditor : UnityEditor.UI.TextEditor
         public string title;
         public int frame;
         public int index;
+        public int lineNum;
+        public int lineIndex;
 
-        public SpriteInfo(string title, int frame, int index)
+        public SpriteInfo(string title, int frame, int index, int lineNum, int lineIndex)
         {
             this.title = title;
             this.frame = frame;
             this.index = index;
+            this.lineNum = lineNum;
+            this.lineIndex = lineIndex;
         }
 
         public override string ToString()
         {
-            return String.Format(title + "\t" + frame + "\t" + index);
+            return $"{title}\t{frame}\t{index}\t{lineNum}\t{lineIndex}";
+            return string.Format(title + "\t" + frame + "\t" + index);
         }
     }
 

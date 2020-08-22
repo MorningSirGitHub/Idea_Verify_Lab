@@ -53,7 +53,8 @@ public class PathSelectWindow : EditorWindow
     private List<string> m_OutputList = new List<string>();
     private List<bool> m_PathSelect = new List<bool>();
     private Vector2 m_ScrollPos = Vector2.zero;
-    private Action<List<Object>, List<string>> m_CloseCallback;
+    private Action m_CloseCallback;
+    private Action<List<Object>, List<string>> m_OKCallback;
     private bool m_IsCompiling = false;
 
     public bool IsSingleChoice { get; set; }
@@ -77,7 +78,14 @@ public class PathSelectWindow : EditorWindow
             UpdateWindow();
         }
     }
-    public void SetCloseListener(Action<List<Object>, List<string>> callback, bool isClear = true)
+    public void SetOKListener(Action<List<Object>, List<string>> callback, bool isClear = true)
+    {
+        if (isClear)
+            m_OKCallback = callback;
+        else
+            m_OKCallback += callback;
+    }
+    public void SetCloseListener(Action callback, bool isClear = true)
     {
         if (isClear)
             m_CloseCallback = callback;
@@ -104,7 +112,6 @@ public class PathSelectWindow : EditorWindow
         }
         EditorTools.ResetProgressBar();
     }
-
     void OnGUI()
     {
         GUILayout.Space(10);
@@ -188,7 +195,7 @@ public class PathSelectWindow : EditorWindow
 
         if (GUILayout.Button("我选好了"))
         {
-            Close();
+            CloseThisWindow();
         }
         GUILayout.Space(10);
     }
@@ -198,6 +205,15 @@ public class PathSelectWindow : EditorWindow
         {
             m_PathSelect[i] = index == i;
         }
+    }
+    private bool HasSelect()
+    {
+        for (int i = 0; i < m_PathSelect.Count; i++)
+        {
+            if (m_PathSelect[i])
+                return true;
+        }
+        return false;
     }
     private void GetSelectPath(out List<Object> objList, out List<string> outputList)
     {
@@ -212,10 +228,30 @@ public class PathSelectWindow : EditorWindow
             outputList.Add(m_OutputList[i]);
         }
     }
+    private void CloseThisWindow()
+    {
+        if (!HasSelect() && !EditorUtility.DisplayDialog(titleContent.text, "没有 选中 任何选项", "退出", "再次选择"))
+            return;
+
+        Close();
+        if (m_OKCallback != null)
+        {
+            List<Object> objList;
+            List<string> outputList;
+            GetSelectPath(out objList, out outputList);
+            m_OKCallback(objList, outputList);
+        }
+        m_CloseCallback?.Invoke();
+    }
     private void OnEnable()
     {
         CompilationPipeline.assemblyCompilationStarted += OnCompilationStarted;
         CompilationPipeline.assemblyCompilationFinished += OnCompilationFinished;
+    }
+    private void OnDisable()
+    {
+        CompilationPipeline.assemblyCompilationStarted -= OnCompilationStarted;
+        CompilationPipeline.assemblyCompilationFinished -= OnCompilationFinished;
     }
     private void OnCompilationStarted(string assemblyName)
     {
@@ -226,23 +262,11 @@ public class PathSelectWindow : EditorWindow
     {
         m_IsCompiling = false;
         RemoveNotification();
+
         // NOTE: 可以根据窗口的需要进行过滤
         //if (assemblyName != "Library/ScriptAssemblies/Assembly-CSharp-Editor.dll")
         //    return;
 
         UpdateWindow();
-    }
-    private void OnDestroy()
-    {
-        CompilationPipeline.assemblyCompilationStarted -= OnCompilationStarted;
-        CompilationPipeline.assemblyCompilationFinished -= OnCompilationFinished;
-
-        if (m_CloseCallback != null)
-        {
-            List<Object> objList;
-            List<string> outputList;
-            GetSelectPath(out objList, out outputList);
-            m_CloseCallback(objList, outputList);
-        }
     }
 }
