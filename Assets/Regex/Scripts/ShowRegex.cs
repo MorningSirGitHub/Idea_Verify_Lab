@@ -32,9 +32,12 @@ public class ShowRegex : MonoBehaviour
     private void RegexContent()
     {
         var title = @"";
+        title += "输入：\n";
         //title += InputContent.text = m_LastInput = m_InputContent;
         title += m_LastInput = InputContent.text;
         title += "\n";
+
+        title += "表达式：\n";
         //title += RegexPattern.text = m_LastRegex = m_RegexPattern;
         title += m_LastRegex = RegexPattern.text;
         title += "\n";
